@@ -81,6 +81,12 @@ systemctl enable "$I2PD_UNIT" --quiet
 # Create the dedicated NGINX config using the conf/nginx.conf template
 ynh_config_add_nginx
 
+# Tile logo for the SSO portal (supported override for non-catalog apps)
+if [ -f "$YNH_APP_BASEDIR/logos/i2pd.png" ]; then
+    cp "$YNH_APP_BASEDIR/logos/i2pd.png" "/usr/share/yunohost/applogos/$app.png"
+    yunohost user permission update "$app.main" --logo "/usr/share/yunohost/applogos/$app.png" || true
+fi
+
 yunohost service add "$I2PD_UNIT" \
     --description="i2pd, the C++ I2P router" \
     --log="/var/log/i2pd/i2pd.log"
