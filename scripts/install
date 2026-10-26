@@ -33,32 +33,38 @@ ynh_check_tcp_port_free "$port_socks"
 ynh_check_tcp_port_free "$port_sam"
 
 #=================================================
-# INSTALL UPSTREAM PACKAGE
-#=================================================
-ynh_script_progression "Installing upstream i2pd from its pinned release deb..."
-
-install_i2pd_deb
-
-# The deb's postinst starts i2pd immediately with the stock
-# configuration; stop it while the managed configuration is laid down.
-ynh_systemctl --service="$I2PD_UNIT" --action="stop"
-
-#=================================================
 # APP INITIAL CONFIGURATION
 #=================================================
 ynh_script_progression "Adding i2pd's configuration files..."
+
+# The managed configuration is laid down BEFORE the deb is installed:
+# the deb's postinst starts i2pd immediately, and with the stock
+# configuration it would bind the upstream default proxy/SAM ports
+# (4444/4445/7656) — the same ports the java_i2p app uses. Writing our
+# chosen ports first makes that auto-start harmless when both routers
+# coexist on one server.
+mkdir -p "$I2PD_CONFD/tunnels.conf.d"
 
 # The systemd unit, AppArmor profile, user and datadir all come from the
 # deb itself; this package only manages the configuration below.
 ynh_config_add --template="i2pd.conf" --destination="$I2PD_CONFD/i2pd.conf"
 ynh_config_add --template="tunnels.conf" --destination="$I2PD_CONFD/tunnels.conf"
 
-# Drop-in directory for tunnel definitions (--tunnelsdir in the unit)
-mkdir -p "$I2PD_CONFD/tunnels.conf.d"
-
 # /etc/i2pd must stay world-readable: the i2pd system user needs read
 # access and the deb ships its conffiles as root:root 644.
 chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
+
+#=================================================
+# INSTALL UPSTREAM PACKAGE
+#=================================================
+ynh_script_progression "Installing upstream i2pd from its pinned release deb..."
+
+install_i2pd_deb
+
+# The deb's postinst has started i2pd with the managed configuration
+# already in place (with our ports). Stop it while the remaining system
+# configuration is laid down; it is started again at the end.
+ynh_systemctl --service="$I2PD_UNIT" --action="stop"
 
 #=================================================
 # SYSTEM CONFIGURATION
@@ -66,6 +72,7 @@ chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 ynh_script_progression "Adding system configurations related to i2pd..."
 
 # Restart-policy hardening for the deb's unit, as a tracked drop-in
+mkdir -p "/etc/systemd/system/${I2PD_UNIT}.service.d"
 ynh_config_add --template="systemd-override.conf" \
     --destination="/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
 systemctl daemon-reload

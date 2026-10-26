@@ -44,6 +44,7 @@ chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 #=================================================
 ynh_script_progression "Upgrading system configurations related to i2pd..."
 
+mkdir -p "/etc/systemd/system/${I2PD_UNIT}.service.d"
 ynh_config_add --template="systemd-override.conf" \
     --destination="/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
 systemctl daemon-reload
