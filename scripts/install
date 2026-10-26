@@ -1,0 +1,88 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+### Install parameters are automatically saved as settings, so besides
+### the domain/path/permission questions these will exist:
+### - $port_http, $port_socks, $port_sam (string questions)
+### The ports resource provisions:
+### - $port (webconsole, loopback) and $port_ext (I2NP peer, firewalled)
+
+#=================================================
+# INITIALIZE AND STORE SETTINGS
+#=================================================
+
+# SAM datagram (UDP) port: upstream convention is one below the TCP port.
+port_sam_udp=$((port_sam - 1))
+ynh_app_setting_set --key=port_sam_udp --value=$port_sam_udp
+
+#=================================================
+# SANITY CHECKS
+#=================================================
+
+# The loopback service ports must be free. The java_i2p app (Java I2P
+# router) listens on the same upstream defaults — 4444 for its HTTP
+# proxy and 7656 for SAM — when installed on the same server.
+ynh_check_tcp_port_free "$port_http"
+ynh_check_tcp_port_free "$port_socks"
+ynh_check_tcp_port_free "$port_sam"
+
+#=================================================
+# INSTALL UPSTREAM PACKAGE
+#=================================================
+ynh_script_progression "Installing upstream i2pd from its pinned release deb..."
+
+install_i2pd_deb
+
+# The deb's postinst starts i2pd immediately with the stock
+# configuration; stop it while the managed configuration is laid down.
+ynh_systemctl --service="$I2PD_UNIT" --action="stop"
+
+#=================================================
+# APP INITIAL CONFIGURATION
+#=================================================
+ynh_script_progression "Adding i2pd's configuration files..."
+
+# The systemd unit, AppArmor profile, user and datadir all come from the
+# deb itself; this package only manages the configuration below.
+ynh_config_add --template="i2pd.conf" --destination="$I2PD_CONFD/i2pd.conf"
+ynh_config_add --template="tunnels.conf" --destination="$I2PD_CONFD/tunnels.conf"
+
+# Drop-in directory for tunnel definitions (--tunnelsdir in the unit)
+mkdir -p "$I2PD_CONFD/tunnels.conf.d"
+
+# /etc/i2pd must stay world-readable: the i2pd system user needs read
+# access and the deb ships its conffiles as root:root 644.
+chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations related to i2pd..."
+
+# Restart-policy hardening for the deb's unit, as a tracked drop-in
+ynh_config_add --template="systemd-override.conf" \
+    --destination="/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
+systemctl daemon-reload
+systemctl enable "$I2PD_UNIT" --quiet
+
+# Create the dedicated NGINX config using the conf/nginx.conf template
+ynh_config_add_nginx
+
+yunohost service add "$I2PD_UNIT" \
+    --description="i2pd, the C++ I2P router" \
+    --log="/var/log/i2pd/i2pd.log"
+
+#=================================================
+# START SERVICE
+#=================================================
+ynh_script_progression "Starting i2pd..."
+
+ynh_systemctl --service="$I2PD_UNIT" --action="start"
+
+ynh_script_progression "Installation of i2pd completed"

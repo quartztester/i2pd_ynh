@@ -1,0 +1,82 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/main/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "i2pd"
+name = "i2pd"
+description.en = "Lightweight C++ router for the I2P anonymous network"
+description.fr = "Routeur C++ léger pour le réseau anonyme I2P"
+
+version = "3.0.0~ynh1"
+
+maintainers = []
+
+[upstream]
+license = "BSD-3-Clause"
+website = "https://i2pd.website"
+admindoc = "https://i2pd.readthedocs.io/en/latest/"
+code = "https://github.com/PurpleI2P/i2pd"
+
+[integration]
+yunohost = ">= 12.0"
+helpers_version = "2.1"
+architectures = ["amd64", "i386", "armhf", "arm64"]
+multi_instance = false
+ldap = "not_relevant"
+sso = "not_relevant"
+disk = "100M"
+ram.runtime = "256M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    # The webconsole uses absolute internal links: install at the root of
+    # a dedicated (sub)domain.
+    type = "path"
+    default = "/"
+
+    [install.init_main_permission]
+    # The webconsole is proxied through nginx and gated by the SSO portal.
+    help.en = "The i2pd webconsole is proxied through nginx and protected by the YunoHost SSO portal; members of this group will be able to view it."
+    type = "group"
+    default = "all_users"
+
+    [install.port_http]
+    ask.en = "HTTP proxy port"
+    help.en = "Port of i2pd's built-in eepsite HTTP proxy, bound to localhost only. The upstream default is 4444 — the same port the Java I2P router (java_i2p app) uses for its HTTP proxy. If that app is installed on this server, pick another port, e.g. 4447."
+    type = "string"
+    default = "4444"
+
+    [install.port_socks]
+    ask.en = "SOCKS proxy port"
+    help.en = "Port of i2pd's built-in SOCKS proxy (localhost only). Upstream default 4447; the Java router uses 4444/4445/4446 for its own proxies — pick e.g. 4448 if it is installed."
+    type = "string"
+    default = "4447"
+
+    [install.port_sam]
+    ask.en = "SAM bridge port"
+    help.en = "TCP port of i2pd's SAMv3 bridge for local applications (localhost only). Upstream default 7656, also the Java router's SAM default — pick e.g. 7666 when both run side by side."
+    type = "string"
+    default = "7656"
+
+[resources]
+    [resources.permissions]
+        main.url = "/"
+        # The webconsole has no authentication of its own; the SSO portal
+        # gates the URL, so ssowat must not inject Basic credentials.
+        main.auth_header = false
+
+    [resources.ports]
+        # Webconsole: bound to loopback and proxied by nginx — reserved,
+        # never firewalled open.
+        main.default = 7070
+        # I2NP peer port (NTCP2 over TCP and SSU2 over UDP share it),
+        # i2pd's upstream default. Fixed so admins can set up a stable
+        # port-forward; the firewall opening is handled by this resource.
+        # NB: the java_i2p app uses 51427 for the same purpose, so the
+        # two packages' defaults do not clash.
+        ext.default = 4567
+        ext.exposed = "Both"
+        ext.fixed = true

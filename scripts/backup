@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
+source /usr/share/yunohost/helpers
+
+ynh_print_info "Declaring files to be backed up..."
+
+#=================================================
+# BACKUP THE APP FILES
+#=================================================
+
+# Managed configuration (i2pd.conf, tunnels.conf, tunnels.conf.d)
+ynh_backup "$I2PD_CONFD"
+
+# Router identity, netDb, addressbook — the data that makes the router
+# "the same router" again after a restore.
+ynh_backup "$I2PD_DATA_DIR"
+
+#=================================================
+# BACKUP SYSTEM CONFIGURATION
+#=================================================
+
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+ynh_backup "/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
+
+# NB: the upstream deb itself (binary, unit, AppArmor profile) is
+# re-downloaded from its pinned release on restore; logs are not backed up.
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."

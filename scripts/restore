@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# RESTORE THE UPSTREAM PACKAGE
+#=================================================
+ynh_script_progression "Reinstalling the upstream i2pd package..."
+
+# The deb (binary, systemd unit, AppArmor profile, i2pd user) is
+# re-downloaded from its pinned release; network access is required.
+install_i2pd_deb
+
+ynh_systemctl --service="$I2PD_UNIT" --action="stop"
+
+#=================================================
+# RESTORE THE APP FILES
+#=================================================
+ynh_script_progression "Restoring i2pd's files..."
+
+ynh_restore "$I2PD_CONFD"
+ynh_restore "$I2PD_DATA_DIR"
+
+chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
+
+#=================================================
+# RESTORE SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Restoring system configurations related to i2pd..."
+
+ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+ynh_restore "/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
+systemctl daemon-reload
+systemctl enable "$I2PD_UNIT" --quiet
+
+yunohost service add "$I2PD_UNIT" \
+    --description="i2pd, the C++ I2P router" \
+    --log="/var/log/i2pd/i2pd.log"
+
+#=================================================
+# START SERVICES
+#=================================================
+ynh_script_progression "Reloading NGINX web server and starting i2pd..."
+
+ynh_systemctl --service="$I2PD_UNIT" --action="start"
+ynh_systemctl --service="nginx" --action="reload"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Restoration completed for $app"

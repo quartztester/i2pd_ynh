@@ -1,0 +1,17 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/main/schemas/tests.v1.schema.json
+
+test_format = 1.0
+
+[default]
+
+    # ---------------------------------------------------------------
+    # Notes for CI
+    # ---------------------------------------------------------------
+    # - Install at a domain root: the i2pd webconsole generates absolute
+    #   internal links, so only root-path installs are exercised.
+    # - No database, no PHP: nothing to customize beyond the standard
+    #   arguments (domain, path, init_main_permission) and the
+    #   port_http/port_socks/port_sam string questions, which have
+    #   upstream defaults.
+    # - multi_instance = false in the manifest, so install.multi is
+    #   skipped automatically.

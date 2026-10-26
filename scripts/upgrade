@@ -1,0 +1,68 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Stopping i2pd's systemd service..."
+
+ynh_systemctl --service="$I2PD_UNIT" --action="stop"
+
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression "Ensuring downward compatibility..."
+
+ynh_app_setting_set_default --key=port_sam_udp --value=$((port_sam - 1))
+
+#=================================================
+# UPGRADE UPSTREAM PACKAGE
+#=================================================
+ynh_script_progression "Upgrading upstream i2pd from its pinned release deb..."
+
+# dpkg keeps our managed /etc/i2pd conffiles (--force-confold in the helper)
+install_i2pd_deb
+
+#=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression "Updating i2pd's configuration files..."
+
+ynh_config_add --template="i2pd.conf" --destination="$I2PD_CONFD/i2pd.conf"
+ynh_config_add --template="tunnels.conf" --destination="$I2PD_CONFD/tunnels.conf"
+mkdir -p "$I2PD_CONFD/tunnels.conf.d"
+chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
+
+#=================================================
+# REAPPLY SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Upgrading system configurations related to i2pd..."
+
+ynh_config_add --template="systemd-override.conf" \
+    --destination="/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
+systemctl daemon-reload
+
+ynh_config_add_nginx
+
+yunohost service add "$I2PD_UNIT" \
+    --description="i2pd, the C++ I2P router" \
+    --log="/var/log/i2pd/i2pd.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting i2pd's systemd service..."
+
+ynh_systemctl --service="$I2PD_UNIT" --action="start"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Upgrade of i2pd completed"
