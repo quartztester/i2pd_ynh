@@ -18,7 +18,7 @@ Routeur C++ léger pour le réseau anonyme I2P
 **Côte à côte avec le routeur Java :** cette app et `java_i2p` peuvent tourner en même temps — les ports de console et pair ne se chevauchent jamais — mais les deux héritent des mêmes défauts amont pour les proxys/SAM (4444 / 7656). Lors de l'installation d'i2pd sur un serveur qui fait déjà tourner `java_i2p`, choisissez d'autres ports quand ils sont demandés (p. ex. 4447, 4448, 7666) ; l'installation échoue immédiatement sur un port occupé.
 
 [![🌐 Site officiel de l'app](https://img.shields.io/badge/Site_officiel_de_l_app-darkgreen?style=for-the-badge)](https://i2pd.website)
-![Version : 3.0.0~ynh1](https://img.shields.io/badge/Version-3.0.0~ynh1-rgb%2818,138,11%29?style=for-the-badge)
+![Version : 3.0.0~ynh2](https://img.shields.io/badge/Version-3.0.0~ynh2-rgb%2818,138,11%29?style=for-the-badge)
 
 ## Liens
 

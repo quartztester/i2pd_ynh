@@ -98,4 +98,8 @@ ynh_script_progression "Starting i2pd..."
 
 ynh_systemctl --service="$I2PD_UNIT" --action="start"
 
+#=================================================
+# END OF SCRIPT
+#=================================================
+
 ynh_script_progression "Installation of i2pd completed"

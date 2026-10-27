@@ -18,7 +18,7 @@ Lightweight C++ router for the I2P anonymous network
 **Side by side with the Java router:** this app and `java_i2p` can run at the same time — webconsole and peer ports never clash — but both inherit the same upstream proxy/SAM defaults (4444 / 7656). When installing i2pd on a server that already runs `java_i2p`, choose different ports when asked (e.g. 4447, 4448, 7666); the installation fails fast on an occupied port. See the table below.
 
 [![🌐 Official app website](https://img.shields.io/badge/Official_app_website-darkgreen?style=for-the-badge)](https://i2pd.website)
-![Version: 3.0.0~ynh1](https://img.shields.io/badge/Version-3.0.0~ynh1-rgb%2818,138,11%29?style=for-the-badge)
+![Version: 3.0.0~ynh2](https://img.shields.io/badge/Version-3.0.0~ynh2-rgb%2818,138,11%29?style=for-the-badge)
 
 <div align="center">
 <a href="https://github.com/quartztester/i2pd_ynh#readme"><img height="100px" src="https://github.com/YunoHost/yunohost-artwork/raw/refs/heads/main/badges/neopossum-badges/badge_more_info_on_the_appstore.svg"/></a>
