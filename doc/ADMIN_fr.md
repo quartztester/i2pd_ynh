@@ -17,7 +17,7 @@ Lisibles avec `yunohost app setting i2pd get -k <clé>` :
 | `port_ext` | 4567 | port pair I2NP (NTCP2 TCP + SSU2 UDP), ouvert dans nftables |
 | `port_http` | 4444 | proxy HTTP eepsite intégré — loopback |
 | `port_socks` | 4447 | proxy SOCKS eepsite intégré — loopback |
-| `port_sam` | 7666 | pont SAMv3 TCP — loopback (`port_sam_udp` = TCP−1) |
+| `port_sam` | 7656 | pont SAMv3 TCP — loopback (`port_sam_udp` = TCP−1) |
 
 Pour en changer : éditez `/etc/i2pd/i2pd.conf` puis `systemctl restart i2pd`.
 
@@ -25,7 +25,7 @@ Pour en changer : éditez `/etc/i2pd/i2pd.conf` puis `systemctl restart i2pd`.
 
 Les deux apps routeur peuvent tourner simultanément sur le même serveur. Seuls les défauts amont se chevauchent :
 
-- Les deux apps activent leur pont SAM par défaut, sur des ports loopback volontairement distincts : java_i2p sur 7656 (défaut amont), i2pd sur 7666 — l'une, l'autre ou les deux fonctionnent donc immédiatement. Le seul chevauchement restant est le proxy HTTP Java (4444/4445) face au défaut HTTP d'i2pd ; les questions `port_http` / `port_socks` y pourvoient. L'installation échoue immédiatement si un port choisi est déjà occupé.
+- Les deux apps activent leur pont SAM par défaut sur le port amont 7656 : la première installée le garde, la seconde détecte le conflit et bascule automatiquement sur 7666 (`port_sam` enregistre le port réel — `yunohost app setting i2pd port_sam`). Le seul chevauchement restant est le proxy HTTP Java (4444/4445) face au défaut HTTP d'i2pd ; les questions `port_http` / `port_socks` y pourvoient. L'installation échoue immédiatement si un port choisi est déjà occupé.
 - Les ports pairs ne se chevauchent jamais : java 51427, i2pd 4567. Transférez les deux, TCP **et** UDP, sur la box pour la meilleure connectivité.
 - Laissez la section `[i2cp]` d'i2pd désactivée (défaut amont) : le routeur Java sert l'I2CP sur 7654.
 - Noms de service, utilisateurs système, répertoires de données et vhosts nginx sont totalement séparés.

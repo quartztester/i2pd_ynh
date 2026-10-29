@@ -58,9 +58,9 @@ ram.runtime = "256M"
 
     [install.port_sam]
     ask.en = "SAM bridge port"
-    help.en = "TCP port of i2pd's SAMv3 bridge for local applications (localhost only). The java_i2p app enables its own SAM on the upstream default 7656, so this app defaults to 7666 and both routers can coexist out of the box."
+    help.en = "TCP port of i2pd's SAMv3 bridge for local applications (localhost only). Upstream default 7656; if it is already taken (e.g. the java_i2p app's SAM), the install automatically falls back to 7666 so both routers coexist."
     type = "string"
-    default = "7666"
+    default = "7656"
 
 [resources]
     [resources.permissions]

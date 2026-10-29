@@ -17,6 +17,19 @@ source /usr/share/yunohost/helpers
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
+# SAM port policy: 7656 is the upstream default and belongs to whichever
+# router app was installed FIRST. If it is already taken (e.g. java_i2p's
+# SAM is up), automatically fall back to 7666 so both coexist.
+port_busy() { ss -ltn 2>/dev/null | grep -qE "[:.]$1([[:space:]]|\$)"; }
+if port_busy "$port_sam"; then
+    if port_busy 7666; then
+        ynh_die "Neither SAM port $port_sam nor the fallback 7666 is free. Stop the other router or choose another port."
+    fi
+    ynh_print_warn "SAM port $port_sam is already in use (another I2P router?); using 7666 for $app's SAM bridge."
+    port_sam=7666
+    ynh_app_setting_set --key=port_sam --value=$port_sam
+fi
+
 # SAM datagram (UDP) port: upstream convention is one below the TCP port.
 port_sam_udp=$((port_sam - 1))
 ynh_app_setting_set --key=port_sam_udp --value=$port_sam_udp

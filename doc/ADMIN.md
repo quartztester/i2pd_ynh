@@ -17,7 +17,7 @@ Settings readable with `yunohost app setting i2pd get -k <key>`:
 | `port_ext` | 4567 | I2NP peer port (NTCP2 TCP + SSU2 UDP), opened in nftables |
 | `port_http` | 4444 | built-in eepsite HTTP proxy — loopback |
 | `port_socks` | 4447 | built-in eepsite SOCKS proxy — loopback |
-| `port_sam` | 7666 | SAMv3 bridge TCP — loopback (`port_sam_udp` = TCP−1) |
+| `port_sam` | 7656 | SAMv3 bridge TCP — loopback (`port_sam_udp` = TCP−1) |
 
 To change one: edit `/etc/i2pd/i2pd.conf`, then `systemctl restart i2pd`. The loopback services are not availability-checked again afterwards, so pick free ports yourself (`ss -H -ltn | grep :PORT`).
 
@@ -25,7 +25,7 @@ To change one: edit `/etc/i2pd/i2pd.conf`, then `systemctl restart i2pd`. The lo
 
 Both router apps can run on the same server at the same time. The only inherited overlaps are upstream defaults:
 
-- Both apps enable their SAM bridge by default, on deliberately distinct loopback ports: java_i2p on 7656 (upstream default), i2pd on 7666 — so either or both work out of the box and downstream apps can target a known port per router. The remaining overlap is the Java HTTP proxy (4444/4445) vs i2pd's HTTP proxy default; the install questions `port_http` / `port_socks` cover it (4444/4447 shipped, Java takes 4444 — check the bind errors or just move i2pd's to 4448/4449 if both are installed). The install fails fast (`ynh_check_tcp_port_free`) if a chosen port is already bound.
+- Both apps enable their SAM bridge by default, on the upstream default 7656. Whichever router is installed first keeps 7656; the one installed second detects the conflict and automatically falls back to 7666 (`port_sam` records the actual port — query it with `yunohost app setting i2pd port_sam`). Downstream apps should read that setting rather than hardcoding. The remaining overlap is the Java HTTP proxy (4444/4445) vs i2pd's HTTP proxy default; the install questions `port_http` / `port_socks` cover it, and the install fails fast (`ynh_check_tcp_port_free`) if a chosen port is already bound.
 - Peer ports never clash: java 51427, i2pd 4567. Forward both, TCP **and** UDP, on the internet router for best connectivity.
 - Keep i2pd's `[i2cp]` section disabled (upstream default): the Java router serves I2CP on 7654.
 - Service names, system users, data directories and nginx vhosts are fully separate (`i2pd` service/user/`/var/lib/i2pd` vs the Java app's own service under `/home/yunohost.app/java_i2p`).
