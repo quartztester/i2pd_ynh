@@ -26,7 +26,6 @@ ynh_app_setting_set_default --key=port_sam_udp --value=$((port_sam - 1))
 #=================================================
 ynh_script_progression "Upgrading upstream i2pd from its pinned release deb..."
 
-# dpkg keeps our managed /etc/i2pd conffiles (--force-confold in the helper)
 install_i2pd_deb
 
 #=================================================

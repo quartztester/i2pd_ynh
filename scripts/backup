@@ -14,7 +14,6 @@ ynh_print_info "Declaring files to be backed up..."
 # BACKUP THE APP FILES
 #=================================================
 
-# Managed configuration (i2pd.conf, tunnels.conf, tunnels.conf.d)
 ynh_backup "$I2PD_CONFD"
 
 # Router identity, netDb, addressbook — the data that makes the router
@@ -29,8 +28,7 @@ ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_backup "/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
 
-# NB: the upstream deb itself (binary, unit, AppArmor profile) is
-# re-downloaded from its pinned release on restore; logs are not backed up.
+# Upstream deb itself is not backed up — re-downloaded from its pinned release on restore.
 
 #=================================================
 # END OF SCRIPT

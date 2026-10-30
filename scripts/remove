@@ -31,14 +31,11 @@ ynh_script_progression "Purging the upstream i2pd package..."
 
 DEBIAN_FRONTEND=noninteractive apt-get -y purge i2pd
 
-# /var/lib/i2pd holds the router identity and netDb; it survives a plain
-# remove so that a reinstall resumes as the same router. It is only
-# deleted when the app is removed with --purge.
+# /var/lib/i2pd (router identity, netDb) survives plain remove so reinstall resumes as the same router; delete only on --purge.
 if [ "${YNH_APP_PURGE:-0}" = "1" ]; then
     ynh_safe_rm "$I2PD_DATA_DIR"
 fi
 
-# Leftover non-conffile state (e.g. tunnels.conf.d drop-ins)
 ynh_safe_rm "$I2PD_CONFD"
 
 #=================================================

@@ -13,8 +13,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression "Reinstalling the upstream i2pd package..."
 
-# The deb (binary, systemd unit, AppArmor profile, i2pd user) is
-# re-downloaded from its pinned release; network access is required.
+# Re-downloads deb (binary, unit, AppArmor profile, i2pd user) from pinned release — network required.
 install_i2pd_deb
 
 ynh_systemctl --service="$I2PD_UNIT" --action="stop"

@@ -7,25 +7,18 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
-# multi_instance=false self-guard: fixed router/SAM/SOCKS ports and one router identity per machine.
-# YunoHost 12.1 does not refuse a second copy on its own.
+# multi_instance self-guard: fixed ports + one router identity per machine; YunoHost 12.1 does not refuse a second copy on its own.
 if [[ "$app" != "i2pd" && -d /etc/yunohost/apps/i2pd ]]; then
 	ynh_die "Only one instance of this app is supported (already installed as 'i2pd')."
 fi
 
-### Install parameters are automatically saved as settings, so besides
-### the domain/path/permission questions these will exist:
-### - $port_http, $port_socks, $port_sam (string questions)
-### The ports resource provisions:
-### - $port (webconsole, loopback) and $port_ext (I2NP peer, firewalled)
+# $port_http/$port_socks/$port_sam come from manifest string questions (auto-saved as settings); ports resource gives $port (webconsole, loopback) and $port_ext (I2NP peer, firewalled).
 
 #=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
-# SAM port policy: 7656 is the upstream default and belongs to whichever
-# router app was installed FIRST. If it is already taken (e.g. java_i2p's
-# SAM is up), automatically fall back to 7666 so both coexist.
+# SAM policy: upstream 7656 belongs to whichever router was installed first; fall back to 7666 (e.g. java_i2p) so both coexist.
 port_busy() { ss -ltn 2>/dev/null | grep -qE "[:.]$1([[:space:]]|\$)"; }
 if port_busy "$port_sam"; then
     if port_busy 7666; then
@@ -44,9 +37,7 @@ ynh_app_setting_set --key=port_sam_udp --value=$port_sam_udp
 # SANITY CHECKS
 #=================================================
 
-# The loopback service ports must be free. The java_i2p app (Java I2P
-# router) listens on the same upstream defaults — 4444 for its HTTP
-# proxy and 7656 for SAM — when installed on the same server.
+# java_i2p listens on the same upstream defaults (4444 proxy, 7656 SAM) — loopback ports must be free to coexist.
 ynh_check_tcp_port_free "$port_http"
 ynh_check_tcp_port_free "$port_socks"
 ynh_check_tcp_port_free "$port_sam"
@@ -56,22 +47,13 @@ ynh_check_tcp_port_free "$port_sam"
 #=================================================
 ynh_script_progression "Adding i2pd's configuration files..."
 
-# The managed configuration is laid down BEFORE the deb is installed:
-# the deb's postinst starts i2pd immediately, and with the stock
-# configuration it would bind the upstream default proxy/SAM ports
-# (4444/4447/7656) — 4444 and 7656 being the two the java_i2p app also
-# uses. Writing our
-# chosen ports first makes that auto-start harmless when both routers
-# coexist on one server.
+# Lay down config BEFORE the deb: its postinst auto-starts i2pd, which would bind stock 4444/4447/7656 and collide with java_i2p.
 mkdir -p "$I2PD_CONFD/tunnels.conf.d"
 
-# The systemd unit, AppArmor profile, user and datadir all come from the
-# deb itself; this package only manages the configuration below.
 ynh_config_add --template="i2pd.conf" --destination="$I2PD_CONFD/i2pd.conf"
 ynh_config_add --template="tunnels.conf" --destination="$I2PD_CONFD/tunnels.conf"
 
-# /etc/i2pd must stay world-readable: the i2pd system user needs read
-# access and the deb ships its conffiles as root:root 644.
+# Keep 644: matches the deb's conffile mode (root:root 644) so the i2pd user can read it.
 chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 
 #=================================================
@@ -81,9 +63,7 @@ ynh_script_progression "Installing upstream i2pd from its pinned release deb..."
 
 install_i2pd_deb
 
-# The deb's postinst has started i2pd with the managed configuration
-# already in place (with our ports). Stop it while the remaining system
-# configuration is laid down; it is started again at the end.
+# postinst already auto-started i2pd on our ports; stop it while system config lands, start again at the end.
 ynh_systemctl --service="$I2PD_UNIT" --action="stop"
 
 #=================================================
@@ -91,17 +71,16 @@ ynh_systemctl --service="$I2PD_UNIT" --action="stop"
 #=================================================
 ynh_script_progression "Adding system configurations related to i2pd..."
 
-# Restart-policy hardening for the deb's unit, as a tracked drop-in
+# Restart-policy hardening for the deb's unit
 mkdir -p "/etc/systemd/system/${I2PD_UNIT}.service.d"
 ynh_config_add --template="systemd-override.conf" \
     --destination="/etc/systemd/system/${I2PD_UNIT}.service.d/$app.conf"
 systemctl daemon-reload
 systemctl enable "$I2PD_UNIT" --quiet
 
-# Create the dedicated NGINX config using the conf/nginx.conf template
 ynh_config_add_nginx
 
-# Tile logo for the SSO portal (supported override for non-catalog apps)
+# SSO portal tile logo (supported override for non-catalog apps)
 if [ -f "$YNH_APP_BASEDIR/logos/i2pd.png" ]; then
     cp "$YNH_APP_BASEDIR/logos/i2pd.png" "/usr/share/yunohost/applogos/$app.png"
     yunohost user permission update "$app.main" --logo "/usr/share/yunohost/applogos/$app.png" || true

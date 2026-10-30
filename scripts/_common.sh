@@ -4,10 +4,7 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-# i2pd ships as one plain .deb per architecture on its upstream GitHub
-# releases (the upstream apt repository is not reliably reachable and
-# Debian's own i2pd is much older). All library dependencies of the deb
-# come from Debian main, so no extra repository is needed.
+# Pinned per-arch GitHub .deb: upstream apt repo unreliable, Debian's i2pd much older; all deb deps come from Debian main.
 I2PD_DEB_VERSION="3.0.0-1bookworm1"
 I2PD_DEB_TAG="3.0.0"
 I2PD_DEB_URL_BASE="https://github.com/PurpleI2P/i2pd/releases/download/${I2PD_DEB_TAG}"
@@ -18,8 +15,7 @@ I2PD_DEB_SHA256_arm64="63e1c085e97151ab0b5848807e4cc3bcedf85951b3e821652ea86801a
 I2PD_DEB_SHA256_armhf="220a11d723e07d3293910e7ed76b3c292ecc3b961024f4f76ee9ddfa8918a812"
 I2PD_DEB_SHA256_i386="214bed768f15391c9e4ed253598875931cebb9d0d32379d264e476725174c55d"
 
-# Native paths of the deb: the i2pd AppArmor profile only grants the
-# i2pd user access to these, so the app must not relocate them.
+# AppArmor grants the i2pd user only these deb-native paths — do not relocate.
 I2PD_CONFD="/etc/i2pd"
 I2PD_DATA_DIR="/var/lib/i2pd"
 I2PD_UNIT="i2pd"
@@ -28,9 +24,7 @@ I2PD_UNIT="i2pd"
 # PERSONAL HELPERS
 #=================================================
 
-# Download and install the pinned upstream i2pd deb for this machine's
-# architecture, verifying its sha256 first. dpkg keeps any locally
-# modified conffile (--force-confold), so /etc/i2pd survives upgrades.
+# dpkg --force-confold keeps locally modified conffiles, so /etc/i2pd survives upgrades.
 install_i2pd_deb() {
     local arch
     arch=$(dpkg --print-architecture)
@@ -58,9 +52,7 @@ install_i2pd_deb() {
     rm -f "$deb"
 }
 
-# Fail fast when a TCP port is already bound on this server — most
-# relevant when the Java I2P router (java_i2p app) runs side by side,
-# since both routers share the same upstream proxy/SAM defaults.
+# Fails fast on bound TCP ports: java_i2p coexistence — both routers share the upstream proxy/SAM defaults.
 ynh_check_tcp_port_free() {
     local port="$1"
 
