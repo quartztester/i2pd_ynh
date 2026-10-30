@@ -9,7 +9,7 @@ so it can be regenerated from the manifest later without rework.
   i2pd, packaged for YunoHost
 </h1>
 
-Lightweight C++ router for the I2P anonymous network
+Router for the I2P anonymous network, written in C++
 
 [i2pd](https://i2pd.website) is a full-featured I2P router written in C++ — a lighter alternative to the Java router. It relays encrypted tunnels for the network (by default volunteering as a **floodfill**) and gives the server local access points to I2P: an HTTP and a SOCKS proxy for eepsites, plus a SAM bridge for applications and containers. The webconsole (peers, tunnels, bandwidth, addressbook) is proxied by nginx behind the YunoHost SSO portal.
 

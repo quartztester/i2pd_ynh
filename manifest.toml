@@ -4,8 +4,8 @@ packaging_format = 2
 
 id = "i2pd"
 name = "i2pd"
-description.en = "Lightweight C++ router for the I2P anonymous network"
-description.fr = "Routeur C++ léger pour le réseau anonyme I2P"
+description.en = "Router for the I2P anonymous network, written in C++"
+description.fr = "Routeur pour le réseau anonyme I2P, écrit en C++"
 
 version = "3.0.0~ynh3"
 
