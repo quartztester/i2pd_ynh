@@ -23,6 +23,7 @@ helpers_version = "2.1"
 architectures = ["amd64", "i386", "armhf", "arm64"]
 # Machine-global: the pinned deb provides one fixed i2pd system user,
 # systemd unit and /etc/i2pd — no per-instance isolation is possible.
+# single instance: fixed router/SAM/SOCKS ports and one router identity per machine
 multi_instance = false
 ldap = "not_relevant"
 sso = "not_relevant"

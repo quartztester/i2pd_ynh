@@ -1,5 +1,7 @@
 # i2pd — admin runbook (YunoHost app `i2pd`)
 
+Single instance only (`multi_instance = false`): fixed router/SAM/SOCKS ports and one router identity per machine.
+
 ## What runs where
 
 - Binary, systemd unit (`i2pd.service`), user `i2pd` and AppArmor profile all come from upstream's pinned release deb. The pin (version + per-architecture sha256) lives in `scripts/_common.sh` of the app repository — to upgrade, bump it and the manifest version, then `yunohost app upgrade i2pd`.

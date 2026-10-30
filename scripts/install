@@ -7,6 +7,12 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
+# multi_instance=false self-guard: fixed router/SAM/SOCKS ports and one router identity per machine.
+# YunoHost 12.1 does not refuse a second copy on its own.
+if [[ "$app" != "i2pd" && -d /etc/yunohost/apps/i2pd ]]; then
+	ynh_die "Only one instance of this app is supported (already installed as 'i2pd')."
+fi
+
 ### Install parameters are automatically saved as settings, so besides
 ### the domain/path/permission questions these will exist:
 ### - $port_http, $port_socks, $port_sam (string questions)
