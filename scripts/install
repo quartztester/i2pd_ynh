@@ -53,7 +53,8 @@ ynh_script_progression "Adding i2pd's configuration files..."
 # The managed configuration is laid down BEFORE the deb is installed:
 # the deb's postinst starts i2pd immediately, and with the stock
 # configuration it would bind the upstream default proxy/SAM ports
-# (4444/4445/7656) — the same ports the java_i2p app uses. Writing our
+# (4444/4447/7656) — 4444 and 7656 being the two the java_i2p app also
+# uses. Writing our
 # chosen ports first makes that auto-start harmless when both routers
 # coexist on one server.
 mkdir -p "$I2PD_CONFD/tunnels.conf.d"

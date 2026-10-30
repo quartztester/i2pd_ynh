@@ -18,7 +18,7 @@ Lightweight C++ router for the I2P anonymous network
 **Side by side with the Java router:** this app and `java_i2p` can run at the same time — webconsole and peer ports never clash — but both inherit the same upstream proxy/SAM defaults (4444 / 7656). When installing i2pd on a server that already runs `java_i2p`, choose different ports when asked (e.g. 4447, 4448, 7666); the installation fails fast on an occupied port. See the table below.
 
 [![🌐 Official app website](https://img.shields.io/badge/Official_app_website-darkgreen?style=for-the-badge)](https://i2pd.website)
-![Version: 3.0.0~ynh2](https://img.shields.io/badge/Version-3.0.0~ynh2-rgb%2818,138,11%29?style=for-the-badge)
+![Version: 3.0.0~ynh3](https://img.shields.io/badge/Version-3.0.0~ynh3-rgb%2818,138,11%29?style=for-the-badge)
 
 <div align="center">
 <a href="https://github.com/quartztester/i2pd_ynh#readme"><img height="100px" src="https://github.com/YunoHost/yunohost-artwork/raw/refs/heads/main/badges/neopossum-badges/badge_more_info_on_the_appstore.svg"/></a>
@@ -35,8 +35,8 @@ All loopback unless noted. The right-hand column is the `java_i2p` app's fresh-i
 | I2NP peer port (TCP+UDP, firewalled open) | 4567 | 51427 |
 | HTTP proxy | 4444 → pick e.g. 4447 | 4444 |
 | HTTPS/CONNECT proxy | — | 4445 |
-| SOCKS proxy | 4447 → pick e.g. 4448 | — |
-| SAM bridge | 7656 → pick e.g. 7666 | 7656 |
+| SOCKS proxy | 4447 → 4448 only if HTTP moved to 4447 | — |
+| SAM bridge | 7656 (auto-fallback to 7666) | 7656 |
 | IRC / SMTP / POP client tunnels | — | 6668 / 7659 / 7660 |
 | Eepsite Jetty | — | 7658 |
 | I2CP | 7654 (disabled by default) | 7654 |

@@ -7,7 +7,7 @@ name = "i2pd"
 description.en = "Lightweight C++ router for the I2P anonymous network"
 description.fr = "Routeur C++ léger pour le réseau anonyme I2P"
 
-version = "3.0.0~ynh2"
+version = "3.0.0~ynh3"
 
 maintainers = []
 
@@ -21,6 +21,8 @@ code = "https://github.com/PurpleI2P/i2pd"
 yunohost = ">= 12.0"
 helpers_version = "2.1"
 architectures = ["amd64", "i386", "armhf", "arm64"]
+# Machine-global: the pinned deb provides one fixed i2pd system user,
+# systemd unit and /etc/i2pd — no per-instance isolation is possible.
 multi_instance = false
 ldap = "not_relevant"
 sso = "not_relevant"
@@ -52,7 +54,7 @@ ram.runtime = "256M"
 
     [install.port_socks]
     ask.en = "SOCKS proxy port"
-    help.en = "Port of i2pd's built-in SOCKS proxy (localhost only). Upstream default 4447; the Java router uses 4444/4445/4446 for its own proxies — pick e.g. 4448 if it is installed."
+    help.en = "Port of i2pd's built-in SOCKS proxy (localhost only). The upstream default is 4447, which does not clash with the Java I2P router (java_i2p app — its proxies are 4444/4445). Move it only if you picked 4447 for the HTTP proxy above, e.g. to 4448."
     type = "string"
     default = "4447"
 

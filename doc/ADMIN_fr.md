@@ -25,7 +25,7 @@ Pour en changer : éditez `/etc/i2pd/i2pd.conf` puis `systemctl restart i2pd`.
 
 Les deux apps routeur peuvent tourner simultanément sur le même serveur. Seuls les défauts amont se chevauchent :
 
-- Les deux apps activent leur pont SAM par défaut sur le port amont 7656 : la première installée le garde, la seconde détecte le conflit et bascule automatiquement sur 7666 (`port_sam` enregistre le port réel — `yunohost app setting i2pd port_sam`). Le seul chevauchement restant est le proxy HTTP Java (4444/4445) face au défaut HTTP d'i2pd ; les questions `port_http` / `port_socks` y pourvoient. L'installation échoue immédiatement si un port choisi est déjà occupé.
+- Les deux apps activent leur pont SAM par défaut sur le port amont 7656 : la première installée le garde, la seconde détecte le conflit et bascule automatiquement sur 7666 (`port_sam` enregistre le port réel — `yunohost app setting i2pd port_sam`). Le seul chevauchement restant est le proxy HTTP, que les deux routeurs mettent par défaut sur 4444 (le HTTPS de java est sur 4445, le SOCKS d'i2pd sur 4447 — aucun conflit) ; les questions `port_http` / `port_socks` y pourvoient. L'installation échoue immédiatement si un port choisi est déjà occupé.
 - Les ports pairs ne se chevauchent jamais : java 51427, i2pd 4567. Transférez les deux, TCP **et** UDP, sur la box pour la meilleure connectivité.
 - Laissez la section `[i2cp]` d'i2pd désactivée (défaut amont) : le routeur Java sert l'I2CP sur 7654.
 - Noms de service, utilisateurs système, répertoires de données et vhosts nginx sont totalement séparés.
