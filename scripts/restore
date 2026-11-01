@@ -27,6 +27,10 @@ ynh_script_progression "Restoring i2pd's files..."
 ynh_restore "$I2PD_CONFD"
 ynh_restore "$I2PD_DATA_DIR"
 
+# tar lands root-owned; i2pd runs as its own system user and crashes with
+# boost::filesystem::filesystem_error if it can't write its datadir
+chown -R i2pd: /var/lib/i2pd
+
 chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 
 #=================================================
