@@ -39,6 +39,10 @@ install_i2pd_deb() {
     local codename
     codename=$(. /etc/os-release && echo "${VERSION_CODENAME:-}")
 
+    # package_check base images ship pruned apt lists; refresh before
+    # either path (also resolves the deb's deps on trixie)
+    apt-get update
+
     if [ "$codename" = "bookworm" ]; then
         DEBIAN_FRONTEND=noninteractive apt-get -y \
             -o Dpkg::Options::="--force-confold" \
