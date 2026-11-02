@@ -97,9 +97,11 @@ ynh_check_tcp_port_free() {
 # moment install finishes, so wait for the socket before returning.
 ynh_wait_webconsole() {
     local port="${1:-$port}"
-    for _ in $(seq 1 60); do
+    # CI containers are entropy-starved: router key + cert generation can
+    # take minutes before the console socket ever binds
+    for _ in $(seq 1 150); do
         ss -H -ltn "( sport = :$port )" | grep -q . && return 0
         sleep 2
     done
-    ynh_die "i2pd's webconsole did not come up on port $port within 120s."
+    ynh_die "i2pd's webconsole did not come up on port $port within 300s."
 }
