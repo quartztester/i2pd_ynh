@@ -58,6 +58,7 @@ yunohost service add "$I2PD_UNIT" \
 ynh_script_progression "Reloading NGINX web server and starting i2pd..."
 
 ynh_systemctl --service="$I2PD_UNIT" --action="start"
+ynh_wait_webconsole
 ynh_systemctl --service="nginx" --action="reload"
 
 #=================================================

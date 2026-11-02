@@ -91,3 +91,15 @@ ynh_check_tcp_port_free() {
         ynh_die "TCP port $port is already in use on this server (for example by the java_i2p app) — pick another port."
     fi
 }
+
+# The webconsole only binds after router-key generation, which can take
+# minutes on a loaded box — CI (and impatient admins) curl the URL the
+# moment install finishes, so wait for the socket before returning.
+ynh_wait_webconsole() {
+    local port="${1:-$port}"
+    for _ in $(seq 1 60); do
+        ss -H -ltn "( sport = :$port )" | grep -q . && return 0
+        sleep 2
+    done
+    ynh_die "i2pd's webconsole did not come up on port $port within 120s."
+}

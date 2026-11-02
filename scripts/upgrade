@@ -61,6 +61,7 @@ yunohost service add "$I2PD_UNIT" \
 ynh_script_progression "Starting i2pd's systemd service..."
 
 ynh_systemctl --service="$I2PD_UNIT" --action="start"
+ynh_wait_webconsole
 
 #=================================================
 # END OF SCRIPT
