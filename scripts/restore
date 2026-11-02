@@ -30,6 +30,10 @@ ynh_restore "$I2PD_DATA_DIR"
 # tar lands root-owned; i2pd runs as its own system user and crashes with
 # boost::filesystem::filesystem_error if it can't write its datadir
 chown -R i2pd: /var/lib/i2pd
+# ynh_restore's default-permissions pass chmod 400s restored dirs — without
+# +x the i2pd user cannot even traverse its datadir or /etc/i2pd
+chmod 755 /var/lib/i2pd /etc/i2pd
+chmod -R u+rwX,go= /var/lib/i2pd
 
 chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 
