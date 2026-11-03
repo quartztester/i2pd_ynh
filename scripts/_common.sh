@@ -4,13 +4,8 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-# i2pd ships as one plain .deb per architecture on its upstream GitHub
-# releases (the upstream apt repository is not reliably reachable and
-# Debian's own i2pd is much older on trixie+). All library dependencies
-# of the deb come from Debian main, so no extra repository is needed.
-# CAVEAT (verified 2026-11-01): upstream's 3.0.0 "bookworm" deb is
-# mislabeled — it links trixie's libboost (1.81), unmet on bookworm
-# (1.74), so on bookworm we install Debian's own i2pd instead.
+# deb from upstream GitHub releases (upstream apt unreliable, Debian's too old on trixie+).
+# shortcut: 3.0.0 "bookworm" deb is mislabeled (links trixie libboost) - bookworm uses Debian's i2pd.
 I2PD_DEB_VERSION="3.0.0-1trixie1"
 I2PD_DEB_TAG="3.0.0"
 I2PD_DEB_URL_BASE="https://github.com/PurpleI2P/i2pd/releases/download/${I2PD_DEB_TAG}"
@@ -21,8 +16,7 @@ I2PD_DEB_SHA256_arm64="8ea84cab7928602fcaa722e761cc4b51d7e5f826d92b4e2ee384baa63
 I2PD_DEB_SHA256_armhf="3f6345e80e3ad4752f7579d506eb85fe2270e4dd0d8b908c0c47283d9f5cf723"
 I2PD_DEB_SHA256_i386="73d57f330e16c0c84ec3c36869cb5c4f1f2a29fd85fe3efb01c783c6eb3512a6"
 
-# Native paths of the deb: the i2pd AppArmor profile only grants the
-# i2pd user access to these, so the app must not relocate them.
+# native deb paths: AppArmor only grants the i2pd user these
 I2PD_CONFD="/etc/i2pd"
 I2PD_DATA_DIR="/var/lib/i2pd"
 I2PD_UNIT="i2pd"
@@ -31,10 +25,8 @@ I2PD_UNIT="i2pd"
 # PERSONAL HELPERS
 #=================================================
 
-# Install i2pd: Debian's own package on bookworm (see the caveat above),
-# otherwise the pinned upstream deb for this machine's architecture,
-# verifying its sha256 first. dpkg keeps any locally modified conffile
-# (--force-confold), so /etc/i2pd survives upgrades.
+# Debian's i2pd on bookworm (caveat above), else pinned upstream deb with sha256 check.
+# --force-confold keeps locally modified conffiles across upgrades.
 install_i2pd_deb() {
     local codename
     codename=$(. /etc/os-release && echo "${VERSION_CODENAME:-}")
@@ -77,9 +69,7 @@ install_i2pd_deb() {
     rm -f "$deb"
 }
 
-# Fail fast when a TCP port is already bound on this server — most
-# relevant when the Java I2P router (java_i2p app) runs side by side,
-# since both routers share the same upstream proxy/SAM defaults.
+# fail fast on bound ports; java_i2p side by side shares the same defaults
 ynh_check_tcp_port_free() {
     local port="$1"
 
@@ -92,9 +82,7 @@ ynh_check_tcp_port_free() {
     fi
 }
 
-# The webconsole only binds after router-key generation, which can take
-# minutes on a loaded box — CI (and impatient admins) curl the URL the
-# moment install finishes, so wait for the socket before returning.
+# webconsole binds only after keygen (minutes on a loaded box): wait for the socket
 ynh_wait_webconsole() {
     local port="${1:-$port}"
     # CI containers are entropy-starved: router key + cert generation can

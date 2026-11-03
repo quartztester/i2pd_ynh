@@ -21,8 +21,7 @@ code = "https://github.com/PurpleI2P/i2pd"
 yunohost = ">= 12.0"
 helpers_version = "2.1"
 architectures = ["amd64", "i386", "armhf", "arm64"]
-# Machine-global: the pinned deb provides one fixed i2pd system user,
-# systemd unit and /etc/i2pd — no per-instance isolation is possible.
+# machine-global: one fixed system user/unit from the deb, no per-instance isolation
 multi_instance = false
 ldap = "not_relevant"
 sso = "not_relevant"
@@ -35,8 +34,7 @@ ram.runtime = "256M"
     type = "domain"
 
     [install.path]
-    # The webconsole uses absolute internal links: install at the root of
-    # a dedicated (sub)domain.
+    # webconsole emits absolute links: root of a dedicated (sub)domain
     type = "path"
     default = "/"
 
@@ -72,14 +70,10 @@ ram.runtime = "256M"
         main.auth_header = false
 
     [resources.ports]
-        # Webconsole: bound to loopback and proxied by nginx — reserved,
-        # never firewalled open.
+        # loopback + nginx proxy: reserved, never firewalled
         main.default = 7070
-        # I2NP peer port (NTCP2 over TCP and SSU2 over UDP share it),
-        # i2pd's upstream default. Fixed so admins can set up a stable
-        # port-forward; the firewall opening is handled by this resource.
-        # NB: the java_i2p app uses 51427 for the same purpose, so the
-        # two packages' defaults do not clash.
+        # I2NP peer port (NTCP2+SSU2), upstream default; fixed for stable port-forward.
+        # NB: java_i2p uses 51427, defaults must not clash.
         ext.default = 4567
         ext.exposed = "Both"
         ext.fixed = true

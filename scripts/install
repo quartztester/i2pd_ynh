@@ -7,19 +7,14 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
-### Install parameters are automatically saved as settings, so besides
-### the domain/path/permission questions these will exist:
-### - $port_http, $port_socks, $port_sam (string questions)
-### The ports resource provisions:
-### - $port (webconsole, loopback) and $port_ext (I2NP peer, firewalled)
+### settings after install: $port_http/$port_socks/$port_sam (string asks)
+### ports resource: $port (webconsole, loopback), $port_ext (I2NP peer, firewalled)
 
 #=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
-# SAM port policy: 7656 is the upstream default and belongs to whichever
-# router app was installed FIRST. If it is already taken (e.g. java_i2p's
-# SAM is up), automatically fall back to 7666 so both coexist.
+# SAM 7656 belongs to whichever router app came first; fall back to 7666 if taken
 port_busy() { ss -ltn 2>/dev/null | grep -qE "[:.]$1([[:space:]]|\$)"; }
 if port_busy "$port_sam"; then
     if port_busy 7666; then
@@ -38,9 +33,7 @@ ynh_app_setting_set --key=port_sam_udp --value=$port_sam_udp
 # SANITY CHECKS
 #=================================================
 
-# The loopback service ports must be free. The java_i2p app (Java I2P
-# router) listens on the same upstream defaults — 4444 for its HTTP
-# proxy and 7656 for SAM — when installed on the same server.
+# loopback ports must be free; java_i2p shares the 4444/7656 upstream defaults
 ynh_check_tcp_port_free "$port_http"
 ynh_check_tcp_port_free "$port_socks"
 ynh_check_tcp_port_free "$port_sam"
@@ -50,22 +43,15 @@ ynh_check_tcp_port_free "$port_sam"
 #=================================================
 ynh_script_progression "Adding i2pd's configuration files..."
 
-# The managed configuration is laid down BEFORE the deb is installed:
-# the deb's postinst starts i2pd immediately, and with the stock
-# configuration it would bind the upstream default proxy/SAM ports
-# (4444/4447/7656) — 4444 and 7656 being the two the java_i2p app also
-# uses. Writing our
-# chosen ports first makes that auto-start harmless when both routers
-# coexist on one server.
+# write our ports BEFORE the deb install: postinst auto-starts i2pd which
+# would otherwise bind the 4444/7656 defaults java_i2p also uses
 mkdir -p "$I2PD_CONFD/tunnels.conf.d"
 
-# The systemd unit, AppArmor profile, user and datadir all come from the
-# deb itself; this package only manages the configuration below.
+# unit/AppArmor/user/datadir come from the deb; we only manage configuration
 ynh_config_add --template="i2pd.conf" --destination="$I2PD_CONFD/i2pd.conf"
 ynh_config_add --template="tunnels.conf" --destination="$I2PD_CONFD/tunnels.conf"
 
-# /etc/i2pd must stay world-readable: the i2pd system user needs read
-# access and the deb ships its conffiles as root:root 644.
+# keep 644: the i2pd user must read conffiles the deb ships as root:root 644
 chmod 644 "$I2PD_CONFD/i2pd.conf" "$I2PD_CONFD/tunnels.conf"
 
 #=================================================
@@ -75,9 +61,7 @@ ynh_script_progression "Installing upstream i2pd from its pinned release deb..."
 
 install_i2pd_deb
 
-# The deb's postinst has started i2pd with the managed configuration
-# already in place (with our ports). Stop it while the remaining system
-# configuration is laid down; it is started again at the end.
+# postinst already started i2pd on our ports; stop it until the rest is laid down
 ynh_systemctl --service="$I2PD_UNIT" --action="stop"
 
 #=================================================
